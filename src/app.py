@@ -28,13 +28,6 @@ app.include_router(
 async def check_authentication(user: User = Depends(current_user)):
     return {"email": user.email}
 
-@app.get("/", response_class=HTMLResponse)
-async def serve_react_app():
-    index_path = Path("static/index.html")
-    return index_path.read_text()
-
-# Маршрут для статических файлов
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(refs_router, tags=["Refs"])
 
