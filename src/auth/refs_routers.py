@@ -11,7 +11,7 @@ from src.auth.auth_cookie import fastapi_users
 from src.auth.manager import get_user_manager, UserManager
 from src.auth.models import User, Referral
 from src.auth.schemas import ReferralCodeResponse, ReferralRegistrationResponse, UserCreate, UserCreateRefs, \
-    ReferralResponse
+    ReferralsById, ReferralCodeByEmail
 from src.database import redis, get_async_session
 
 refs_router = APIRouter()
@@ -38,7 +38,7 @@ async def create_referral_code(
     user: User = Depends(current_user)
 ):
     code = await generate_referral_code(user.id)
-    return ReferralCodeResponse(code=code, expires_in=3 *60* 60)
+    return ReferralCodeResponse(code=code, expires_in=3 * 60 * 60)
 
 @refs_router.post("/del_referral_code")
 async def delete_referral_code(
@@ -131,16 +131,16 @@ async def get_my_referrals(
     return referral_data
 
 
-@refs_router.get("/referrals_by_id")
+@refs_router.post("/referrals_by_id")
 async def get_referrals_by_user_id(
-        user_id: int,
-        session: AsyncSession = Depends(get_async_session),
+    user_id: ReferralsById,
+    session: AsyncSession = Depends(get_async_session),
 ):
     # Получаем рефералов для указанного user_id
     query = (
         select(Referral)
         .options(selectinload(Referral.referred_user))
-        .where(Referral.user_id == user_id)
+        .where(Referral.user_id == user_id.id)  # Изменяем здесь
     )
 
     result = await session.execute(query)
@@ -163,13 +163,13 @@ async def get_referrals_by_user_id(
     return referral_data
 
 
-@refs_router.get("/referral_code_by_email")
+@refs_router.post("/referral_code_by_email")
 async def get_referral_code_by_email(
-        email: str,
+        email: ReferralCodeByEmail,
         session: AsyncSession = Depends(get_async_session),
 ):
     # Получение пользователя по email из базы данных
-    result = await session.execute(select(User).where(User.email == email))
+    result = await session.execute(select(User).where(User.email == email.email))
     user = result.scalars().first()
 
     if not user:

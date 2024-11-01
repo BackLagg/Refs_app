@@ -18,7 +18,6 @@ class UserCreateRefs(schemas.BaseUserCreate):
     referral_code: Optional[str] = None
     pass
 
-# Ответ при успешной регистрации по реферальному коду
 class ReferralRegistrationResponse(BaseModel):
     message: str
     user_id: int
@@ -31,3 +30,8 @@ class ReferralResponse(BaseModel):
     email: str  # Email реферала
     registration_date: datetime  # Дата регистрации реферала
 
+class ReferralsById(BaseModel):
+    id: int
+
+class ReferralCodeByEmail(BaseModel):
+    email: str

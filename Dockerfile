@@ -10,5 +10,5 @@ RUN pip install -r requirements
 
 COPY . .
 
-CMD alembic upgrade head && gunicorn src.app:app --bind=0.0.0.0:8080
+CMD alembic upgrade head && gunicorn src.app:app --workers 3 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8080
 
